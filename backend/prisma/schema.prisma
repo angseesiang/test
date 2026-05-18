@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("analyst")
+  createdAt    DateTime @default(now())
+  sessions     Session[]
+  uploads      UploadedFile[]
+  analyses     Analysis[]
+  auditLogs    AuditLog[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model UploadedFile {
+  id           String   @id @default(cuid())
+  userId        String
+  analysisId    String?
+  originalName  String
+  storagePath   String
+  mimeType      String
+  sizeBytes     Int
+  sha256        String
+  status        String   @default("uploaded")
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id])
+  chunks        ExtractedChunk[]
+}
+
+model Analysis {
+  id         String   @id @default(cuid())
+  userId      String
+  promptText  String
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  chunks      ExtractedChunk[]
+  matches     VectorStoreMatch[]
+  assessments AIRMFAssessment[]
+  reports     Report[]
+}
+
+model ExtractedChunk {
+  id             String   @id @default(cuid())
+  analysisId      String
+  uploadedFileId  String?
+  sourceType      String
+  sourceLabel     String
+  locationJson    Json
+  content         String
+  chunkIndex      Int
+  createdAt       DateTime @default(now())
+  analysis        Analysis @relation(fields: [analysisId], references: [id])
+  uploadedFile    UploadedFile? @relation(fields: [uploadedFileId], references: [id])
+}
+
+model VectorStoreMatch {
+  id                   String   @id @default(cuid())
+  analysisId            String
+  extractedChunkId      String
+  vectorStoreId         String
+  vectorStoreSourceFile String?
+  matchedText           String
+  similarityScore       Float
+  rawResultJson         Json
+  isWeak                Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  analysis              Analysis  @relation(fields: [analysisId], references: [id])
+}
+
+model AIRMFAssessment {
+  id                 String   @id @default(cuid())
+  analysisId          String
+  vectorStoreMatchId  String
+  rmfFunction         String
+  evidenceQuoteUser   String
+  evidenceQuoteStore  String
+  interpretation      String
+  riskGap             String
+  recommendation      String
+  confidenceLabel     String
+  createdAt           DateTime @default(now())
+  analysis            Analysis @relation(fields: [analysisId], references: [id])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId       String?
+  action       String
+  entityType   String
+  entityId     String?
+  metadataJson Json
+  createdAt    DateTime @default(now())
+  user         User?    @relation(fields: [userId], references: [id])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  analysisId   String
+  reportType   String
+  storagePath  String
+  createdAt    DateTime @default(now())
+  analysis     Analysis @relation(fields: [analysisId], references: [id])
+}
