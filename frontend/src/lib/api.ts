@@ -2,6 +2,17 @@ import { Assessment, PublicUser } from '../types';
 
 const TOKEN_KEY = 'nist_rmf_token';
 
+const viteEnv = (import.meta as ImportMeta & {
+  env?: Record<string, string | undefined>;
+}).env;
+
+const API_BASE_URL = (viteEnv?.VITE_API_BASE_URL ?? '').replace(/\/+$/, '');
+
+function apiUrl(url: string) {
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${API_BASE_URL}${url.startsWith('/') ? url : `/${url}`}`;
+}
+
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY) ?? '';
 }
@@ -15,17 +26,34 @@ export function clearToken() {
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
-  const data = await response.json();
+  const raw = await response.text();
+
+  let data: unknown = {};
+  if (raw) {
+    try {
+      data = JSON.parse(raw);
+    } catch (_error) {
+      data = { message: raw };
+    }
+  }
 
   if (!response.ok) {
-    throw new Error(data.message ?? 'Request failed.');
+    const message =
+      data &&
+      typeof data === 'object' &&
+      'message' in data &&
+      typeof data.message === 'string'
+        ? data.message
+        : 'Request failed.';
+
+    throw new Error(message);
   }
 
   return data as T;
 }
 
 export async function apiGet<T>(url: string) {
-  const response = await fetch(url, {
+  const response = await fetch(apiUrl(url), {
     headers: {
       Authorization: `Bearer ${getToken()}`
     }
@@ -35,7 +63,7 @@ export async function apiGet<T>(url: string) {
 }
 
 export async function apiJson<T>(url: string, method: string, body: unknown) {
-  const response = await fetch(url, {
+  const response = await fetch(apiUrl(url), {
     method,
     headers: {
       'Content-Type': 'application/json',
@@ -68,7 +96,7 @@ export async function getAssessment(id: string) {
 }
 
 export async function createAssessment(formData: FormData) {
-  const response = await fetch('/api/assessments', {
+  const response = await fetch(apiUrl('/api/assessments'), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${getToken()}`

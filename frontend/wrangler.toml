@@ -1,0 +1,22 @@
+name = "nist-ai-rmf-advisor"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-05-19"
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "NIST_RMF_DB"
+id = "b08b21c9d8d64422a3b4a6d8c7d23d59"
+
+[vars]
+FRONTEND_ORIGIN = "*"
+OPENAI_MODEL = "gpt-5.5"
+VECTOR_STORE_IDS = "vs_6a0b0b741c38819190b8bc51a9dee79a,vs_6a0b0b5db5e48191816f28821ecd4b6f,vs_6a0b0b3ff85c8191bd8ef06323335a79,vs_6a0b06d3faf4819183127288049ef83c"
+MAX_FILE_MB = "20"
+MAX_FILES_PER_ASSESSMENT = "20"
+MAX_POINTS_PER_ASSESSMENT = "250"
+MIN_POSSIBLE_SCORE = "0.7"
+ALLOWED_MIME_TYPES = "application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+DEFAULT_ADMIN_EMAIL = "admin@example.com"
+DEFAULT_ADMIN_NAME = "Default Admin"
+DEFAULT_USER_EMAIL = "user@example.com"
+DEFAULT_USER_NAME = "User"

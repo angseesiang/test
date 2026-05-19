@@ -7,17 +7,26 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "pages:dev": "npm run build && wrangler pages dev",
+    "pages:deploy": "npm run build && wrangler pages deploy"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "typescript": "latest",
+    "bcryptjs": "latest",
+    "fflate": "latest",
+    "jose": "latest",
+    "mammoth": "latest",
+    "openai": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "xlsx": "latest"
   },
   "devDependencies": {
     "@types/react": "latest",
-    "@types/react-dom": "latest"
+    "@types/react-dom": "latest",
+    "wrangler": "latest"
   }
 }
